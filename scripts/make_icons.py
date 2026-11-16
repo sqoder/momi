@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Generate original geometric macOS AppIcon and monochrome template agent glyphs for momi."""
+"""Generate original geometric macOS AppIcon and icon.png for momi."""
 import math
 import os
-import shutil
 import subprocess
 import tempfile
 from PIL import Image, ImageDraw
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESOURCES_DIR = os.path.join(ROOT_DIR, "resources")
-AGENTS_DIR = os.path.join(RESOURCES_DIR, "agents")
 
 
 def build_squircle_mask(size: int, radius: int) -> Image.Image:
@@ -111,219 +109,10 @@ def generate_app_icon() -> None:
         )
 
 
-# 5x7 pixel-grid bitmap glyphs for sharp geometric monochrome template badges
-GLYPHS = {
-    "A": [
-        "01110",
-        "10001",
-        "10001",
-        "11111",
-        "10001",
-        "10001",
-        "10001",
-    ],
-    "C": [
-        "01111",
-        "10000",
-        "10000",
-        "10000",
-        "10000",
-        "10000",
-        "01111",
-    ],
-    "D": [
-        "11110",
-        "10001",
-        "10001",
-        "10001",
-        "10001",
-        "10001",
-        "11110",
-    ],
-    "G": [
-        "01111",
-        "10000",
-        "10000",
-        "10111",
-        "10001",
-        "10001",
-        "01110",
-    ],
-    "L": [
-        "10000",
-        "10000",
-        "10000",
-        "10000",
-        "10000",
-        "10000",
-        "11111",
-    ],
-    "P": [
-        "11110",
-        "10001",
-        "10001",
-        "11110",
-        "10000",
-        "10000",
-        "10000",
-    ],
-    "Q": [
-        "01110",
-        "10001",
-        "10001",
-        "10001",
-        "10101",
-        "10010",
-        "01101",
-    ],
-    "S": [
-        "01111",
-        "10000",
-        "10000",
-        "01110",
-        "00001",
-        "00001",
-        "11110",
-    ],
-    "X": [
-        "10001",
-        "10001",
-        "01010",
-        "00100",
-        "01010",
-        "10001",
-        "10001",
-    ],
-    "Z": [
-        "11111",
-        "00001",
-        "00010",
-        "00100",
-        "01000",
-        "10000",
-        "11111",
-    ],
-    "PI": [
-        "11111",
-        "01010",
-        "01010",
-        "01010",
-        "01010",
-        "01010",
-        "01001",
-    ],
-}
-
-
-def draw_glyph(draw: ImageDraw.ImageDraw, key: str, x0: int, y0: int, cell: int) -> None:
-    rows = GLYPHS[key]
-    r = max(1, cell // 4)
-    for ry, row in enumerate(rows):
-        for cx, ch in enumerate(row):
-            if ch == "1":
-                px0 = x0 + cx * cell
-                py0 = y0 + ry * cell
-                draw.rounded_rectangle(
-                    [px0, py0, px0 + cell - 1, py0 + cell - 1],
-                    radius=r,
-                    fill=(0, 0, 0, 255),
-                )
-
-
-def make_agent_badge(filename: str, letters: list[str], is_cli: bool = False) -> None:
-    """Draw pure-black monochrome glyph on transparent alpha canvas for NSImage.isTemplate = true."""
-    s = 4
-    sz = 128 * s
-    img = Image.new("RGBA", (sz, sz), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-
-    margin = int(12 * s)
-    box_right = sz - margin - (int(12 * s) if is_cli else 0)
-    box_bottom = sz - margin - (int(12 * s) if is_cli else 0)
-    draw.rounded_rectangle(
-        [margin, margin, box_right, box_bottom],
-        radius=int(24 * s),
-        outline=(0, 0, 0, 255),
-        width=int(9 * s),
-    )
-
-    inner_w = box_right - margin
-    inner_h = box_bottom - margin
-    cx = margin + inner_w // 2
-    cy = margin + inner_h // 2
-
-    if len(letters) == 1:
-        cell = int(9.5 * s)
-        gw = 5 * cell
-        gh = 7 * cell
-        draw_glyph(draw, letters[0], cx - gw // 2, cy - gh // 2, cell)
-    else:
-        cell = int(6.2 * s)
-        gw = 5 * cell
-        gh = 7 * cell
-        gap = int(5 * s)
-        total_w = gw * 2 + gap
-        gx0 = cx - total_w // 2
-        gy0 = cy - gh // 2
-        draw_glyph(draw, letters[0], gx0, gy0, cell)
-        draw_glyph(draw, letters[1], gx0 + gw + gap, gy0, cell)
-
-    if is_cli:
-        # Solid rounded CLI indicator badge at bottom-right (carved transparent '>_')
-        bx0 = sz - int(58 * s)
-        by0 = sz - int(50 * s)
-        bx1 = sz - int(6 * s)
-        by1 = sz - int(6 * s)
-        draw.rounded_rectangle([bx0, by0, bx1, by1], radius=int(10 * s), fill=(0, 0, 0, 255))
-        # Cut '>' and '_' inside badge with transparent pixels
-        cut = int(4.5 * s)
-        draw.line(
-            [
-                (bx0 + int(11 * s), by0 + int(13 * s)),
-                (bx0 + int(22 * s), by0 + int(22 * s)),
-                (bx0 + int(11 * s), by0 + int(31 * s)),
-            ],
-            fill=(0, 0, 0, 0),
-            width=cut,
-            joint="curve",
-        )
-        draw.line(
-            [
-                (bx0 + int(27 * s), by0 + int(31 * s)),
-                (bx0 + int(41 * s), by0 + int(31 * s)),
-            ],
-            fill=(0, 0, 0, 0),
-            width=cut,
-        )
-
-    out = img.resize((128, 128), Image.LANCZOS)
-    # Enforce strict template invariant: RGB = (0, 0, 0) on every pixel, alpha carries shape
-    px = out.load()
-    for y in range(128):
-        for x in range(128):
-            _, _, _, a = px[x, y]
-            px[x, y] = (0, 0, 0, a)
-    out.save(os.path.join(AGENTS_DIR, filename))
-
-
 def main() -> None:
-    os.makedirs(AGENTS_DIR, exist_ok=True)
+    os.makedirs(RESOURCES_DIR, exist_ok=True)
     generate_app_icon()
-    specs = [
-        ("agent_alma.png", ["A", "L"], False),
-        ("agent_antigravity.png", ["A", "G"], False),
-        ("agent_antigravity_cli.png", ["A", "G"], True),
-        ("agent_claude.png", ["C", "C"], False),
-        ("agent_codex.png", ["C", "X"], False),
-        ("agent_codex_cli.png", ["C", "X"], True),
-        ("agent_deepseek.png", ["D", "S"], False),
-        ("agent_pi.png", ["PI"], False),
-        ("agent_qoder.png", ["Q"], False),
-        ("agent_zcode.png", ["Z"], False),
-    ]
-    for fname, letters, is_cli in specs:
-        make_agent_badge(fname, letters, is_cli=is_cli)
-    print(f"Generated AppIcon.icns, icon.png, and {len(specs)} monochrome template badges.")
+    print("Generated AppIcon.icns and icon.png.")
 
 
 if __name__ == "__main__":

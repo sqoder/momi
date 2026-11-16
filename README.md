@@ -102,4 +102,4 @@ momi/
 ## 📄 开源协议与商标声明
 
 - **开源协议**：MIT License — 详见 [LICENSE](LICENSE)。
-- **第三方商标免责声明**：文中及界面提及的 Claude、Codex、Antigravity、DeepSeek、Qoder、Alma、ZCode、Pi 等产品与品牌名称均归各自权利人所有。momi 为独立开源工具，与上述任何品牌或厂商均无从属、赞助或官方关联关系。界面中所有图标均由本项目原创几何模板绘制，未包含任何第三方版权图形资源。
+- **第三方商标免责声明**：文中及界面提及的 Claude、Codex、Antigravity、DeepSeek、Qoder、Alma、ZCode、Pi 等产品与品牌名称均归各自权利人所有。momi 为独立开源工具，与上述任何品牌或厂商均无从属、赞助或官方关联关系。界面展示的各客户端标识仅用于本地会话来源识别与兼容性指示（指示性合理使用 / Nominative Fair Use），相关商标与标识均归各自权利人所有。
