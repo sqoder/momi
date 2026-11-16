@@ -67,6 +67,7 @@ final class AgentTableRowView: NSView {
     func update(instance: MonitoredInstance, icon: NSImage?) {
         currentInstance = instance
         iconView.image = icon
+        iconView.contentTintColor = instance.type == .alma ? nil : .secondaryLabelColor
         iconView.toolTip = instance.name
         modelLabel.stringValue = instance.modelName
         modelLabel.toolTip = instance.modelName
@@ -430,7 +431,7 @@ final class MomiDashboardView: NSView {
 
     private func icon(for instance: MonitoredInstance) -> NSImage? {
         guard let image = NSImage(named: instance.iconResourceName) else { return nil }
-        image.isTemplate = true
+        image.isTemplate = instance.type == .alma ? false : true
         return image
     }
 }

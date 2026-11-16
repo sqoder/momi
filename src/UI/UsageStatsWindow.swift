@@ -1089,6 +1089,11 @@ private final class UsageStatsRowsView: NSView, NSViewToolTipOwner {
     private func tintedIcon(named name: String) -> NSImage? {
         if let cached = tintedIcons[name] { return cached }
         guard let base = NSImage(named: name) else { return nil }
+        if name == "agent_alma" {
+            base.isTemplate = false
+            tintedIcons[name] = base
+            return base
+        }
         base.isTemplate = true
         let size = NSSize(width: 16, height: 16)
         let tinted = NSImage(size: size, flipped: false) { rect in
